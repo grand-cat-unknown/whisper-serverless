@@ -2,15 +2,18 @@
 
 import os
 import runpod
-
+import logging
 # If your handler runs inference on a model, load the model here.
 # You will want models to be loaded into memory before starting serverless.
 
 
 def handler(job):
     """ Handler function that will be used to process jobs. """
+    print(f"Received job: {job}")
     job_input = job['input']
     name = job_input.get('name', 'World')
+    # LOG
+    logging.info(f"Received job: {job}")
     return f"You are **whispering**, {name}!"
 
 if not os.environ["LOCAL"]:
