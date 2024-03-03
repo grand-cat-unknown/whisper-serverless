@@ -24,16 +24,17 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: '0'
-      - name: Minor version for each merge
-        id: taggerDryRun
-        uses: anothrNick/github-tag-action@1.36.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: true
-          DRY_RUN: true
-      - name: echo new tag
-        run: |
-          echo "The next tag version will be: ${{ steps.taggerDryRun.outputs.new_tag }}"
+      - name: Read current version
+        id: read_version
+        run: echo "::set-output name=version::$(cat version.txt)"
+
+      - name: Increment version
+        id: increment_version
+        run: echo "::set-output name=next_version::v$(echo "${{ steps.read_version.outputs.version }}" | awk -F '.' '{print $1"."$2"."$3+1}')"
+
+      - name: Save incremented version
+        run: echo "${{ steps.increment_version.outputs.next_version }}" > version.txt
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
