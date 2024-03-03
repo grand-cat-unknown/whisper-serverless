@@ -30,7 +30,7 @@ jobs:
 
       - name: Increment version
         id: increment_version
-        run: echo "::set-output name=next_version::v$(echo "${{ steps.read_version.outputs.version }}" | awk -F '.' '{print $1"."$2"."$3+1}')"
+        run: echo "::set-output name=next_version::$(echo "${{ steps.read_version.outputs.version }}" | awk -F '.' '{print $1"."$2"."$3+1}')"
 
       - name: Save incremented version
         run: echo "${{ steps.increment_version.outputs.next_version }}" > version.txt
