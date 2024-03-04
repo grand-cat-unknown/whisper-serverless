@@ -7,7 +7,6 @@ FROM runpod/base:0.4.0-cuda11.8.0
 # IMPORTANT: The base image overrides the default huggingface cache location.
 
 
-
 # --- Optional: System dependencies ---
 # COPY builder/setup.sh /setup.sh
 # RUN /bin/bash /setup.sh && \
@@ -27,4 +26,4 @@ RUN python3.11 -m pip install --upgrade pip && \
 ADD src .
 
 # Define the default command to run when the container starts
-CMD if [ "$LOCAL" = "1" ]; then uvicorn handler:app --host 0.0.0.0 --reload --port 80; else python3.11 -u /handler.py; fi
+CMD python3.11 -u /handler.py
