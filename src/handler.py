@@ -8,33 +8,24 @@ import runpod
 import dotenv
 import whisper_timestamped as whisper
 import json
+import boto3
 
 dotenv.load_dotenv()
-# If your handler runs inference on a model, load the model here.
-# You will want models to be loaded into memory before starting serverless.
+s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_S3_ACCESS_ID'), aws_secret_access_key=os.environ.get('AWS_S3_ACCESS_KEY'))
+model = whisper.load_model("tiny")
 
 def handler(job):
     """ Handler function that will be used to process jobs. """
     job_input = job['input']
-    name = job_input.get('name', 'World')
+    song_name = job_input['song_name']
 
-    print("Downloading example.mp3")
-    url = "https://github.com/deezer/spleeter/raw/master/audio_example.mp3"
-    destination_path = "example.mp3"
-    http = urllib3.PoolManager()
-
-    with http.request('GET', url, preload_content=False) as r, open(destination_path, 'wb') as out_file:
-        shutil.copyfileobj(r, out_file)
-    print("Downloaded example.mp3")
-
-    audio = whisper.load_audio("example.mp3")
-    model = whisper.load_model("tiny", device="cpu")
+    print("Downloading song from s3")
+    s3.download_file('auto-karaoke', f'{song_name}/vocals.mp3', 'vocals.mp3')
+    audio = whisper.load_audio("vocals.mp3")
     result = whisper.transcribe(model, audio, language="en")
-
     print(json.dumps(result, indent = 2, ensure_ascii = False))
 
-    return f"You are THE BEST <3, {name}!"
-
+    return "DONE!"
 if not os.environ.get("DEV", False):
     runpod.serverless.start({"handler": handler})
 else:
