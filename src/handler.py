@@ -12,7 +12,7 @@ import boto3
 
 dotenv.load_dotenv()
 s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_S3_ACCESS_ID'), aws_secret_access_key=os.environ.get('AWS_S3_ACCESS_KEY'))
-model = whisper.load_model("tiny")
+model = whisper.load_model("large-v3")
 
 def handler(job):
     """ Handler function that will be used to process jobs. """
@@ -22,8 +22,14 @@ def handler(job):
     print("Downloading song from s3")
     s3.download_file('auto-karaoke', f'{song_name}/vocals.mp3', 'vocals.mp3')
     audio = whisper.load_audio("vocals.mp3")
+    print("transcribing audio")
     result = whisper.transcribe(model, audio, language="en")
-    print(json.dumps(result, indent = 2, ensure_ascii = False))
+    print("Transcription complete")
+
+    print("Saving result to file")
+    with open(f"timestamps.json", "w") as f:
+        json.dump(result, f, indent=2, ensure_ascii=False)
+    s3.upload_file(f"timestamps.json", 'auto-karaoke', f'{song_name}/timestamps.json')
 
     return "DONE!"
 if not os.environ.get("DEV", False):
