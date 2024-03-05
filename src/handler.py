@@ -12,7 +12,6 @@ import boto3
 
 dotenv.load_dotenv()
 s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_S3_ACCESS_ID'), aws_secret_access_key=os.environ.get('AWS_S3_ACCESS_KEY'))
-model = whisper.load_model("large-v3")
 
 def handler(job):
     """ Handler function that will be used to process jobs. """
@@ -33,6 +32,7 @@ def handler(job):
 
     return "DONE!"
 if not os.environ.get("DEV", False):
+    model = whisper.load_model("large-v3")
     runpod.serverless.start({"handler": handler})
 else:
     # serve this using fastapi
@@ -40,6 +40,7 @@ else:
     from fastapi import FastAPI
     import json
     
+    model = whisper.load_model("tiny")
     app = FastAPI()
 
     @app.get("/")
